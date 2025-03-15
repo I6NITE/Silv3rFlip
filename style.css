@@ -1,0 +1,51 @@
+body {
+    background-image: url("https://static.vecteezy.com/system/resources/previews/016/124/733/non_2x/poker-and-casino-playing-card-black-background-vector.jpg");
+}
+
+h1 {
+    color: white;
+    font-size: 50px;
+    margin-left: 50px;
+    text-shadow: 2px 2px 4px #ffffff;
+}
+
+label {
+    color: white;
+    font-size: 45px;
+    position: relative;
+    left: 835px;
+    bottom: 82px;
+}
+
+button {
+    background-color: #bebebe;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+    text-shadow: white;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    padding: 14px 40px;
+    font-size: 15px;
+    border: 2px solid #ffffff;
+    transition-duration: 0.1s;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    left: 180px;
+    bottom: 90px;
+}
+
+button:hover {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    text-shadow: black;
+}
+
+button:active {
+    background-color: #ffffff;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
