@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Silv3rFlip</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1c2833, #2e4053);
+            color: #ecf0f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        #auth-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        #auth-container h2 {
+            margin-bottom: 20px;
+        }
+        
+        #auth-container input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #34495e;
+            color: #ecf0f1;
+        }
+        
+        #auth-container button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        #auth-container button:hover {
+            background-color: #2980b9;
+        }
+        
+        #error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        
+        #toggle-auth {
+            margin-top: 15px;
+            cursor: pointer;
+            color: #3498db;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="auth-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="authenticate()">Login</button>
+        <p id="error-message"></p>
+        <p id="toggle-auth" onclick="toggleAuth()">Register</p>
+    </div>
+
+    <script>
+        let isLogin = true;
+        let users = JSON.parse(localStorage.getItem('users')) || {};
+
+        // Check if user is already logged in
+        if (localStorage.getItem('loggedInUser')) {
+            window.location.href = "Silv3rFlip_game.html"; // Redirect if logged in
+        }
+
+        function authenticate() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const errorMessage = document.getElementById("error-message");
+
+            if (isLogin) {
+                if (users[username] && users[username] === password) {
+                    localStorage.setItem('loggedInUser', username); // Set logged-in flag
+                    window.location.href = "Silv3rflip_game.html";
+                } else {
+                    errorMessage.textContent = "Invalid username or password.";
+                }
+            } else {
+                if (username && password) {
+                    if (users[username]) {
+                        errorMessage.textContent = "Username already exists.";
+                    } else if (username === password) {
+                        errorMessage.textContent = "Username and password cannot be the same.";
+                    } else if (password.length < 6) {
+                        errorMessage.textContent = "Password must be at least 6 characters long.";
+                    } else {
+                        users[username] = password;
+                        localStorage.setItem('users', JSON.stringify(users));
+                        errorMessage.textContent = "Registration successful! Now login.";
+                        toggleAuth();
+                    }
+                } else {
+                    errorMessage.textContent = "Please fill in all fields.";
+                }
+            }
+        }
+
+        function toggleAuth() {
+            isLogin = !isLogin;
+            const authContainer = document.getElementById("auth-container");
+            const authButton = authContainer.querySelector("button");
+            const toggleAuthText = document.getElementById("toggle-auth");
+            const errorMessage = document.getElementById("error-message");
+
+            errorMessage.textContent = "";
+
+            if (isLogin) {
+                authContainer.querySelector("h2").textContent = "Login";
+                authButton.textContent = "Login";
+                toggleAuthText.textContent = "Register";
+            } else {
+                authContainer.querySelector("h2").textContent = "Register";
+                authButton.textContent = "Register";
+                toggleAuthText.textContent = "Login";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
