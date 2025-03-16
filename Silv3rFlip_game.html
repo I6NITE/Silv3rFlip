@@ -467,16 +467,33 @@
 
         function cashOut() {
             if (!gameActive && revealedCells === 0) return;
+
             const winnings = bet * currentMultiplier;
             document.getElementById("message").textContent = `Cashed out! Winnings: ${winnings.toFixed(2)} Robux`;
+
             robux += winnings;
             document.getElementById("currentRobux").textContent = robux.toFixed(2);
+
+            // Reveal all mines when cashing out
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (board[i][j] === "M") {
+                        const cellElement = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+                        if (!cellElement.classList.contains("revealed")) {
+                            cellElement.classList.add("mine");
+                            cellElement.textContent = "M";
+                        }
+                    }
+                }
+            }
+
             gameActive = false;
             document.querySelector("#controls button[onclick='cashOut()']").disabled = true;
             document.getElementById("currentBet").textContent = 0;
             gameStarted = false;
             saveRobux(robux);
         }
+
 
         function addRobux() {
             const amount = parseInt(document.getElementById("adminRobuxAmount").value, 10);
