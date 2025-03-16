@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Silv3rFlip</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1c2833, #2e4053);
+            color: #ecf0f1;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            flex-grow: 1;
+        }
+        
+        #title-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        #title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        #user-icon {
+            width: 24px;
+            height: 24px;
+            background-image: url('https://icon-library.com/images/profile-icon-white/profile-icon-white-1.jpg');
+            background-size: cover;
+            margin-right: 5px;
+        }
+        
+        #logout-button-title {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-left: 5px;
+        }
+        
+        #robux-display {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+        }
+        
+        #controls {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        #controls label,
+        #controls span,
+        #controls p {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        #controls input,
+        #controls button {
+            font-size: 1.1em;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        
+        #controls input {
+            background-color: #34495e;
+            color: #ecf0f1;
+        }
+        
+        #controls button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        #controls button:hover {
+            background-color: #2980b9;
+        }
+        
+        #board {
+            display: grid;
+            grid-gap: 8px;
+            width: 400px;
+            margin: 0 auto;
+            background-color: #2c3e50;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cell {
+            width: 70px;
+            height: 70px;
+            border: 2px solid #34495e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 2.5em;
+            user-select: none;
+            background-color: #34495e;
+            color: #ecf0f1;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cell:hover {
+            background-color: #4a6572;
+        }
+        
+        .revealed {
+            border: 2px solid #2980b9;
+            background-color: #3498db;
+        }
+        
+        .mine {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #message {
+            margin-top: 10px;
+            color: #e67e22;
+        }
+        
+        #admin-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            position: absolute;
+            cursor: move;
+            display: none;
+        }
+        
+        #admin-panel input,
+        #admin-panel button {
+            margin: 5px;
+            padding: 8px 15px;
+            font-size: 1em;
+        }
+        
+        #deposit-button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        #deposit-button:hover {
+            background-color: #27ae60;
+        }
+        
+        #deposit-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        #deposit-modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            color: black;
+            text-align: center;
+        }
+        
+        #deposit-modal-content input,
+        #deposit-modal-content button {
+            margin: 5px;
+            padding: 8px 15px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="title-container">
+            <div id="title"></div>
+            <div id="user-icon"></div>
+            <button id="logout-button-title" onclick="logout()">Logout</button>
+        </div>
+
+        <div id="robux-display">
+            Robux: <span id="currentRobux"> 0.00</span>
+            <button id="deposit-button" onclick="openDepositModal()">Deposit</button>
+        </div>
+
+        <div id="controls">
+            <label for="mines">Mines (1-24):</label>
+            <input type="number" id="mines" value="3" min="1" max="24">
+            <p>Current Bet: <span id="currentBet">0</span></p>
+            <label for="betAmount">Bet Amount:</label>
+            <input type="number" id="betAmount" value="1">
+            <button onclick="placeBet()">Place Bet</button>
+            <button onclick="pickRandomTile()">Pick Random Tile</button>
+            <button onclick="cashOut()" disabled>Cash Out</button>
+            <p>Multiplier: <span id="multiplier">1.00</span></p>
+            <p id="message"></p>
+        </div>
+
+        <div id="board"></div>
+
+        <div id="admin-panel">
+            <h2>Admin Panel</h2>
+            <input type="number" id="adminRobuxAmount" placeholder="Robux to Add">
+            <button onclick="addRobux()">Add Robux</button>
+        </div>
+    </div>
+
+    <div id="deposit-modal">
+        <div id="deposit-modal-content">
+            <h2>Deposit Robux</h2>
+            <input type="text" id="depositCode" placeholder="Enter Code">
+            <button onclick="redeemCode()">Redeem</button>
+            <button onclick="closeDepositModal()">Cancel</button>
+        </div>
+    </div>
+    <script>
+        let board = [];
+        const rows = 5;
+        const cols = 5;
+        let mineCount = 3;
+        let revealedCells = 0;
+        let gameActive = false;
+        let bet = 0;
+        let currentMultiplier = 1.00;
+        let safeCells = [];
+        let gameStarted = false;
+        let dragElement = null;
+        let offsetX, offsetY;
+
+        const tileSound = new Audio("Diamond.mp3"); // Load the sound file
+        const bombSound = new Audio("bomb.mp3"); // Load bomb sound
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderBoard();
+        });
+
+        function playTileSound(isMine) {
+            if (isMine) {
+                bombSound.currentTime = 0;
+                bombSound.play();
+            } else {
+                tileSound.currentTime = 0;
+                tileSound.play();
+            }
+        }
+
+        function getRobuxKey(user) {
+            return `robux_${user || 'guest'}`;
+        }
+
+        function getRobux() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const robuxKey = getRobuxKey(loggedInUser);
+            return parseFloat(localStorage.getItem(robuxKey)) || 0.00;
+        }
+
+        function saveRobux(robuxValue) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const robuxKey = getRobuxKey(loggedInUser);
+            localStorage.setItem(robuxKey, robuxValue.toFixed(2));
+        }
+
+        let robux = getRobux();
+
+        document.getElementById("currentRobux").textContent = robux.toFixed(2);
+
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+            document.getElementById('title').textContent = loggedInUser;
+            if (loggedInUser === "Silv3rGtr") {
+                document.getElementById("admin-panel").style.display = "block";
+            }
+        } else {
+            window.location.href = "Silv3rFlip.html";
+        }
+
+        document.getElementById("admin-panel").addEventListener("mousedown", dragMouseDown);
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            dragElement = e.target.closest('#admin-panel');
+            if (!dragElement || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            e.preventDefault();
+            offsetX = e.clientX - dragElement.offsetLeft;
+            offsetY = e.clientY - dragElement.offsetTop;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            if (!dragElement) return;
+            e = e || window.event;
+            e.preventDefault();
+            dragElement.style.left = (e.clientX - offsetX) + "px";
+            dragElement.style.top = (e.clientY - offsetY) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+            dragElement = null;
+        }
+
+        function placeBet() {
+            if (gameStarted) {
+                document.getElementById("message").textContent = "You cannot place another bet during an active round.";
+                return;
+            }
+
+            const betInput = document.getElementById("betAmount");
+            let betValue = parseFloat(betInput.value);
+
+            // Ensure bet has at most 2 decimal places
+            if (isNaN(betValue) || betValue < 0.01 || betValue > robux) {
+                document.getElementById("message").textContent = "Please enter a valid bet amount.";
+                return;
+            }
+
+            betValue = Math.floor(betValue * 100) / 100; // Trim to two decimals
+            bet = betValue;
+
+            document.getElementById("currentBet").textContent = bet.toFixed(2);
+            robux -= bet;
+            document.getElementById("currentRobux").textContent = robux.toFixed(2);
+
+            startGame();
+            gameStarted = true;
+            saveRobux(robux);
+        }
+
+
+
+        function startGame() {
+            mineCount = parseInt(document.getElementById("mines").value, 10);
+            if (mineCount < 1) {
+                document.getElementById("message").textContent = "Mines must be between 1 and 24";
+                return;
+            }
+            revealedCells = 0;
+            gameActive = true;
+            currentMultiplier = 1.00;
+            document.getElementById("message").textContent = "";
+            document.getElementById("multiplier").textContent = currentMultiplier.toFixed(2);
+            safeCells = [];
+
+            generateBoard();
+            renderBoard();
+            document.querySelector("#controls button[onclick='cashOut()']").disabled = false;
+        }
+
+        function generateBoard() {
+            board = [];
+            for (let i = 0; i < rows; i++) {
+                board.push(Array(cols).fill(0));
+            }
+
+            let minesPlaced = 0;
+            while (minesPlaced < mineCount) {
+                const row = Math.floor(Math.random() * rows);
+                const col = Math.floor(Math.random() * cols);
+                if (board[row][col] === 0) {
+                    board[row][col] = "M";
+                    minesPlaced++;
+                }
+            }
+        }
+
+        function renderBoard() {
+            const boardElement = document.getElementById("board");
+            boardElement.innerHTML = "";
+            boardElement.style.gridTemplateColumns = `repeat(${cols}, 78px)`;
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener("click", function() {
+                        handleCellClick(i, j);
+                    });
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(row, col) {
+            if (!gameActive) return;
+
+            const cellElement = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+            if (cellElement.classList.contains("revealed")) return;
+
+            let isMine = board[row][col] === "M";
+
+            playTileSound(isMine); // Play correct sound based on mine or not
+
+            if (isMine) {
+                revealMines();
+                document.getElementById("message").textContent = "You hit a mine! Game over.";
+                addTransaction(-bet)
+                gameActive = false;
+                document.querySelector("#controls button[onclick='cashOut()']").disabled = true;
+                gameStarted = false;
+                return;
+            }
+
+            cellElement.classList.add("revealed");
+            revealedCells++;
+            safeCells.push({
+                row,
+                col
+            });
+
+            currentMultiplier = calculateMultiplier(revealedCells);
+            document.getElementById("multiplier").textContent = currentMultiplier.toFixed(2);
+
+            if (revealedCells + mineCount === rows * cols) {
+                cashOut();
+            }
+        }
+
+
+        function calculateMultiplier(revealed) {
+            // Predefined multipliers for different mine counts
+            const multipliersByMines = {
+                1: [1.03, 1.08, 1.12, 1.18, 1.24, 1.30, 1.37, 1.46, 1.55, 1.65,
+                    1.77, 1.90, 2.06, 2.25, 2.47, 2.75, 3.09, 3.54, 4.13, 4.95,
+                    6.19, 8.25, 12.38, 24.75
+                ],
+
+                2: [1.08, 1.17, 1.28, 1.41, 1.56, 1.74, 1.94, 2.18, 2.47, 2.83,
+                    3.26, 3.81, 4.50, 5.40, 6.60, 8.25, 10.61, 14.14, 19.8, 29.7,
+                    49.5, 99, 287
+                ],
+
+                3: [1.12, 1.29, 1.48, 1.71, 2.00, 2.35, 2.79, 3.35, 4.07, 5.00,
+                    6.26, 7.96, 10.35, 13.80, 18.97, 27.11, 40.66, 65.06, 113.85,
+                    227.7, 569.25, 2277
+                ],
+
+                4: [1.18, 1.41, 1.71, 2.09, 2.58, 3.23, 4.09, 5.26, 6.88, 9.17,
+                    12.51, 17.52, 25.30, 37.95, 59.64, 99.39, 178.91, 357.81,
+                    834.9, 2504.7, 12523.5,
+                ],
+
+                5: [1.24, 1.56, 2, 2.58, 3.39, 4.52, 6.14, 8.50, 12.04, 17.52,
+                    26.27, 40.87, 66.41, 113.85, 208.72, 417.45, 939.267,
+                    2504.7, 8766.45, 52598.7
+                ],
+
+                6: [1.30, 1.74, 2.35, 3.23, 4.52, 6.46, 9.44, 14.17, 21.89,
+                    35.03, 58.38, 102.17, 189.75, 379.50, 834.9, 2087.25,
+                    6261.75, 25047, 175329
+                ],
+
+                7: [1.37, 1.94, 2.79, 4.09, 6.14, 9.44, 14.95, 24.47, 41.60,
+                    73.95, 138.66, 277.33, 600.87, 1442.10, 3965.77,
+                    13219.25, 59486.62, 475893
+                ],
+
+                8: [1.46, 2.18, 3.35, 5.26, 8, 50, 14.17, 44.05, 83.20,
+                    166.40, 356.56, 831.98, 2163.15, 6489.45,
+                    23794.65, 118973.25, 1070759.25
+                ],
+
+                9: [1.55, 2.47, 4.07, 6.88, 12.04, 21.89, 41.60,
+                    83.20, 176.80, 404.10, 1010.26, 2828.73,
+                    9193.39, 36773.55, 202254.52, 2022545.25
+                ],
+
+                10: [1.65, 2.83, 5, 9.17, 17.52, 35.03, 73.95,
+                    166.40, 404.10, 1077.61, 3232.84,
+                    11314.94, 49031, 294188.4, 3236072.4
+                ],
+
+                11: [1.77, 3.26, 6.26, 12.51, 26.27, 58.38, 138.66, 356.56, 1010.26,
+                    3232.84, 12123.15, 367735.5, 4412826
+                ],
+
+                12: [1.90, 3.81, 7.96, 17.52, 40.87, 102.17, 277.33, 831.98,
+                    2828.73, 11314.94, 56574.69, 396022.85, 5148297
+                ],
+
+                13: [2.06, 4.50, 10.35, 25.30, 66.41, 189.75, 600.87, 2163.15,
+                    9193.39, 49031.4, 367735.5, 5148297
+                ],
+
+                14: [2.25, 5.40, 13.80, 37.95, 113.85, 379.50, 1442.10,
+                    6489.45, 36773.55, 4412826
+                ],
+
+                15: [2.47, 6.60, 18.97, 59.64, 208.72, 834.90, 3965.77,
+                    23794.65, 202254.52, 3236072.4
+                ],
+
+                16: [2.75, 8.25, 27.11, 99.39, 417.45, 2087.25, 13219.25,
+                    118973.25, 2022545.25
+                ],
+
+                17: [3.09, 10.61, 40.66, 178.91, 939.26, 6261.75,
+                    59486.62, 1070759.25
+                ],
+
+                18: [3.54, 14.14, 65.06, 357.81, 2504.70, 25047, 475893],
+
+                19: [4.12, 19.80, 113.85, 2504.70, 8766.45, 175329],
+
+                20: [4.95, 29.70, 227.70, 2504.70, 52598.70],
+
+                21: [6.19, 49.50, 569.25, 12523.50],
+
+                22: [8.25, 297, 2277],
+
+                23: [12.37, 297],
+
+                24: [24.75]
+            };
+
+            // Select the correct table based on mineCount
+            let multipliers = multipliersByMines[mineCount] || [1.00];
+
+            // Ensure the revealed count is within range
+            if (revealed > 0 && revealed <= multipliers.length) {
+                return multipliers[revealed - 1];
+            }
+
+            return 1.00; // Default multiplier if out of bounds
+        }
+
+
+        function revealMines() {
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (board[i][j] === "M") {
+                        const cellElement = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+                        if (!cellElement.classList.contains("revealed")) {
+                            cellElement.classList.add("mine");
+                            cellElement.textContent = "M";
+                        }
+                    }
+                }
+            }
+        }
+
+        function cashOut() {
+            if (!gameActive || revealedCells === 0) {
+                document.getElementById("message").textContent = "You must click at least one tile before cashing out.";
+                return;
+            }
+
+            const winnings = bet * currentMultiplier;
+            document.getElementById("message").textContent = `Cashed out! Winnings: ${winnings.toFixed(2)} Robux`;
+
+            robux += winnings;
+            document.getElementById("currentRobux").textContent = robux.toFixed(2);
+            addTransaction(winnings - bet);
+
+            // Reveal all mines when cashing out
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (board[i][j] === "M") {
+                        const cellElement = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+                        if (!cellElement.classList.contains("revealed")) {
+                            cellElement.classList.add("mine");
+                            cellElement.textContent = "M";
+                        }
+                    }
+                }
+            }
+
+            gameActive = false;
+            document.querySelector("#controls button[onclick='cashOut()']").disabled = true;
+            document.getElementById("currentBet").textContent = 0;
+            gameStarted = false;
+            saveRobux(robux);
+        }
+
+
+
+        function addRobux() {
+            const amount = parseInt(document.getElementById("adminRobuxAmount").value, 10);
+            if (!isNaN(amount) && amount > 0) {
+                robux += amount;
+                document.getElementById("currentRobux").textContent = robux.toFixed(2);
+                document.getElementById("adminRobuxAmount").value = "";
+                saveRobux(robux);
+                localStorage.removeItem('redeemedCodes');
+            } else {
+                alert("Please enter a valid positive number.");
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = "Silv3rFlip.html";
+        }
+
+        function pickRandomTile() {
+            if (!gameActive) return;
+            let unrevealedCells = [];
+            document.querySelectorAll(".cell:not(.revealed)").forEach(cell => {
+                unrevealedCells.push({
+                    row: parseInt(cell.dataset.row),
+                    col: parseInt(cell.dataset.col)
+                });
+            });
+
+            if (unrevealedCells.length === 0) return;
+
+            let randomCell = unrevealedCells[Math.floor(Math.random() * unrevealedCells.length)];
+            handleCellClick(randomCell.row, randomCell.col);
+        }
+
+        function openDepositModal() {
+            document.getElementById('deposit-modal').style.display = 'block';
+        }
+
+        function closeDepositModal() {
+            document.getElementById('deposit-modal').style.display = 'none';
+        }
+
+        function redeemCode() {
+            const code = document.getElementById('depositCode').value;
+            const ipAddress = getIPAddress();
+            const redeemedCodes = JSON.parse(localStorage.getItem('redeemedCodes')) || {};
+
+            if (redeemedCodes[ipAddress] && redeemedCodes[ipAddress].includes(code)) {
+                alert("This code has already been redeemed.");
+                return;
+            }
+
+            const codeValues = {
+                "aBcD123eFgHi": 10,
+                "vBnM3qWeRtYu": 20,
+                "xCVb1nMQwE2r": 30,
+                "lZxC1vBnM2qW": 40,
+                "GhJ3kLZxC4vB": 50,
+                "456jKlMnOpQr": 60,
+                "iOp4aSdFgHjK": 70,
+                "uIoP3aSdFgH4": 80,
+                "tY3uIoPa4sDf": 90,
+                "eR3tY4uIoP5a": 100,
+
+                "StUvW789xYz0": 10,
+                "lZx5cVbNm6QW": 20,
+                "jKlZ5xCVbNm6": 30,
+                "GhJ5kLZxC6vB": 40,
+                "SdF6gHjKlZ7x": 50,
+                "oP7aSdFgH8jK": 60,
+                "tY0uIoPa1sDf": 70,
+                "WeR1tY2uIoP3": 80,
+                "nM3qWeRtY4uI": 90,
+                "xCVb5nM6qWeR7": 100,
+
+                "QwErT1yUiOpA": 10,
+                "SdFgH2jKlZxCv": 20,
+                "BnM3qWeRtYuiO": 30,
+                "PaSdF4gHjKlZx": 40,
+                "CvBnM5qWeRtYu": 50,
+                "IoPaS6dFgHjKl": 60,
+                "ZxCvB7nMqWeRt": 70,
+                "YuIoP8aSdFgHj": 80,
+                "KlZxC9vBnMQwE": 90,
+                "RtYuI0oPaSDFg": 100,
+
+                "AsDfG1hJkLzX": 10,
+                "CvBnM2qWeRtY": 20,
+                "UiOpA3sDfGhJ": 30,
+                "KlZxC4vBnMQw": 40,
+                "ErTyU5iOpAsD": 50,
+                "FgHjK6lZxCvB": 60,
+                "NmQwE7rTyUiO": 70,
+                "PaSdF8gHjKlZ": 80,
+                "XcvBn9mQwErT": 90,
+                "YuIoP0aSdFgH": 100,
+
+                "ZaQxSwCdVe": 10,
+                "RfTgYhUjIk": 20,
+                "OlPkMjInHb": 30,
+                "GvFcDxSzAe": 40,
+                "WrEtYuIoPa": 50,
+                "SdFgHjKlZc": 60,
+                "VbNmQwErTy": 70,
+                "UiOpAsDfGh": 80,
+                "JkLzXcvBnM": 90,
+                "QwErTyUiOp": 100,
+
+                "ohRpwslhkW": 10,
+                "Hjiekw?SDg": 20,
+                "HrejhKSK?h": 30,
+                "Hjuamhwsdh": 40,
+                "GJ37wDnhwa": 50,
+                "Hj5e3khshs": 60,
+                "hjsUh8s4sG": 70,
+                "GnsuzSjhdS": 80,
+                "GlslWoAskn": 90,
+                "SlhnkWik35": 100,
+
+                "JKhzw4ejgRB!tgeGs": 1000,
+                "neazwhthsnBathsbs": 1000,
+                "hekri!DB5zmesfh_h": 1000,
+                "Z%43ijSnuh5jelfys": 1000,
+                "rzo4O489bos,h5dsh": 1000,
+
+                "jig!K,SBmnh4FntbwmIBNFKTWB458izK": 10000,
+                "tui4hzbKDtghu4kbMSDBghIW!%bbz457": 10000,
+                "4ijzabwtaw47zbtiaw4bjtza5uizkaj3": 10000,
+            };
+
+            if (codeValues.hasOwnProperty(code)) {
+                robux += codeValues[code];
+                document.getElementById("currentRobux").textContent = robux.toFixed(2);
+                saveRobux(robux);
+                closeDepositModal();
+                alert(`Code redeemed! ${codeValues[code]} Robux added.`);
+
+                if (!redeemedCodes[ipAddress]) {
+                    redeemedCodes[ipAddress] = [];
+                }
+                redeemedCodes[ipAddress].push(code);
+                localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
+            } else {
+                alert("Invalid code.");
+            }
+        }
+
+        function getIPAddress() {
+            return localStorage.getItem('userIP') || 'unknownIP';
+        }
+
+        if (!localStorage.getItem('userIP')) {
+            localStorage.setItem('userIP', Math.floor(Math.random() * 1000000).toString());
+        }
+
+        const statsContainer = document.createElement("div");
+        statsContainer.style.position = "fixed";
+        statsContainer.style.right = "20px";
+        statsContainer.style.top = "50px";
+        statsContainer.style.padding = "10px 20px";
+        statsContainer.style.borderRadius = "8px";
+        statsContainer.style.fontSize = "18px";
+        statsContainer.style.fontWeight = "bold";
+        statsContainer.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
+        statsContainer.style.backgroundColor = "#fff";
+        document.body.appendChild(statsContainer);
+
+        function updateStatsDisplay() {
+            let profit = parseFloat(localStorage.getItem("dailyProfit")) || 0;
+            statsContainer.textContent = `Today's Profit: $${profit.toFixed(2)}`;
+            statsContainer.style.color = profit >= 0 ? "green" : "red";
+        }
+
+        function addTransaction(amount) {
+            let currentProfit = parseFloat(localStorage.getItem("dailyProfit")) || 0;
+            currentProfit += amount;
+            localStorage.setItem("dailyProfit", currentProfit);
+            updateStatsDisplay();
+        }
+
+        function resetDailyProfit() {
+            const lastReset = localStorage.getItem("lastResetDate");
+            const today = new Date().toLocaleDateString();
+            if (lastReset !== today) {
+                localStorage.setItem("dailyProfit", 0);
+                localStorage.setItem("lastResetDate", today);
+                updateStatsDisplay();
+            }
+        }
+
+        setInterval(resetDailyProfit, 60000);
+
+        resetDailyProfit();
+        updateStatsDisplay();
+    </script>
+</body>
+
+</html>
